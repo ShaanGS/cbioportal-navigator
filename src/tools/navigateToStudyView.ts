@@ -32,6 +32,7 @@ import { studyResolver } from './shared/studyResolver.js';
 import { geneResolver } from './shared/geneResolver.js';
 import { buildStudyUrl } from './studyView/buildStudyUrl.js';
 import { validateTabAvailability } from './studyView/validateStudyViewTab.js';
+import { validateStudyViewFilter } from './studyView/validateStudyViewFilter.js';
 import {
     createNavigationResponse,
     createErrorResponse,
@@ -185,6 +186,23 @@ async function navigateToStudyView(
                     suggestion:
                         'Try "summary" or "plots" tabs which are always available',
                 }
+            );
+        }
+    }
+
+    // A legacy filter on an attribute or value the studies don't have opens
+    // the study unfiltered or with an empty cohort, so reject it here. The
+    // study page ignores the legacy filter when filterJson is set.
+    if (params.filterAttributeId && params.filterValues && !params.filterJson) {
+        const filterValidation = await validateStudyViewFilter(
+            studyIds,
+            params.filterAttributeId,
+            params.filterValues
+        );
+        if (filterValidation.valid === false) {
+            return createErrorResponse(
+                filterValidation.reason,
+                filterValidation.details
             );
         }
     }

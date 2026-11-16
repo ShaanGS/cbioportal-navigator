@@ -59,18 +59,19 @@ export class StudyViewDataClient {
      * - Fetches count data from the API
      * - Extracts unique values without count information
      *
-     * @param studyId - Study identifier
+     * @param studyId - Study identifier, or several studies whose values are merged
      * @param attributeId - Clinical attribute ID
      * @returns Array of unique string values for the attribute
      */
     async getClinicalDataValues(
-        studyId: string,
+        studyId: string | string[],
         attributeId: string
     ): Promise<string[]> {
+        const studyIds = Array.isArray(studyId) ? studyId : [studyId];
         const result = await this.internalApi.fetchClinicalDataCountsUsingPOST({
             clinicalDataCountFilter: {
                 attributes: [{ attributeId, values: [] }],
-                studyViewFilter: { studyIds: [studyId] } as StudyViewFilter,
+                studyViewFilter: { studyIds } as StudyViewFilter,
             },
         });
 
